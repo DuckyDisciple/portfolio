@@ -6,9 +6,16 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 import styled from 'styled-components';
 
-const Hero = styled.section`
-  background: url('../images/hero.jpg');
+import hero from '../images/hero.jpg';
 
+const Hero = styled.section`
+  background: url(${hero});
+  background-size: cover;
+  background-position: right bottom;
+  filter: grayscale(70%);
+  width: 100%;
+  min-height: 30rem;
+  padding: 3rem;
 `;
 
 const IndexPage = () => (
