@@ -9,21 +9,62 @@ import styled from 'styled-components';
 import hero from '../images/hero.jpg';
 
 const Hero = styled.section`
-  background: url(${hero});
-  background-size: cover;
-  background-position: right bottom;
-  filter: grayscale(70%);
+  background-color: #000;
   width: 100%;
   min-height: 30rem;
   padding: 3rem;
+  position: relative;
+
+  &::before {
+    background-image: url(${hero});
+    background-size: cover;
+    background-position: right bottom;
+    filter: grayscale(70%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    content: '';
+    opacity: 0.6;
+  }
 `;
+
+const HeroTitle = styled.h1`
+  text-transform: uppercase;
+  color: white;
+  opacity: 0.99;
+`;
+
+const HeroText = styled.p`
+  color: white;
+  width: 50%;
+  opacity: 0.99;
+`;
+
+const getTimeOfDay = () => {
+  const now = new Date();
+  if (now.getHours() < 12) {
+    return 'morning';
+  } else if (now.getHours() < 20) {
+    return 'afternoon';
+  }
+  return 'evening';
+}
 
 const IndexPage = () => (
   <Layout>
     <SEO title="Home" keywords={[`gatsby`, `application`, `react`]} />
     <Hero>
-      <h1>Hi people</h1>
-      <p>Welcome to your new Gatsby site.</p>
+      <HeroTitle>Good {getTimeOfDay()}!</HeroTitle>
+      <HeroText>I'm Drew! I've been writing code for the past 15 years. While the content
+        and quality have changed, my passion has never died down. My newest ventures
+        have led me into web development, with a focus on using some of the latest
+        technologies to make sites fast, responsive, and pleasing to use.</HeroText>
+      <HeroText>If you're curious what type of work I've done, check out the projects
+        below. These are just some samples to show variety in the different types
+        of apps and sites I have made. If you have a project in mind, feel free
+        to reach out and we can talk about options for your development needs!</HeroText>
     </Hero>
     <p>Now go build something great.</p>
     <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
