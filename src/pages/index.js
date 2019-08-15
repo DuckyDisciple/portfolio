@@ -8,6 +8,15 @@ import styled from 'styled-components';
 
 import hero from '../images/hero.jpg';
 
+//SAMPLE DATA
+const projects = [
+  { name: "Test 1" },
+  { name: "Test 2" },
+  { name: "Test 3" },
+  { name: "Test 4" },
+  { name: "Test 5" }
+];
+
 const Hero = styled.section`
   background-color: #000;
   width: 100%;
@@ -28,6 +37,23 @@ const Hero = styled.section`
     content: '';
     opacity: 0.6;
   }
+`;
+
+const ProjectSection = styled.section`
+  background: #fff;
+  width: 100%;
+  padding: 3rem;
+  text-align: center;
+`;
+
+const ProjectWrapper = styled.div`
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(10rem, 1fr);
+  grid-gap: 1rem;
+  justify-content: center;
+  justify-items: center;
 `;
 
 const HeroTitle = styled.h1`
@@ -66,7 +92,14 @@ const IndexPage = () => (
         of apps and sites I have made. If you have a project in mind, feel free
         to reach out and we can talk about options for your development needs!</HeroText>
     </Hero>
-    <p>Now go build something great.</p>
+    <ProjectSection>
+      <h2>Projects</h2>
+      <ProjectWrapper>
+        {projects.map(project => {
+          return <Project>{project.name}</Project>
+        })}
+      </ProjectWrapper>
+    </ProjectSection>
     <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
       <Image />
     </div>
