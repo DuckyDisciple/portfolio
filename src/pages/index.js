@@ -1,33 +1,14 @@
 import React from "react"
-import { Link } from "gatsby"
-
 import Layout from "../components/layout"
-import Image from "../components/image"
+
 import SEO from "../components/seo"
 import styled from 'styled-components';
 
-import hero from '../images/hero.jpg';
-
 const Hero = styled.section`
-  background-color: #000;
   width: 100%;
   min-height: 30rem;
   padding: 3rem;
   position: relative;
-
-  &::before {
-    background-image: url(${hero});
-    background-size: cover;
-    background-position: right bottom;
-    filter: grayscale(70%);
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    position: absolute;
-    content: '';
-    opacity: 0.6;
-  }
 `;
 
 const HeroTitle = styled.h1`
@@ -66,11 +47,6 @@ const IndexPage = () => (
         of apps and sites I have made. If you have a project in mind, feel free
         to reach out and we can talk about options for your development needs!</HeroText>
     </Hero>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link>
   </Layout >
 )
 
