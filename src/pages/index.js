@@ -11,6 +11,23 @@ const Hero = styled.section`
   position: relative;
 `;
 
+const ProjectSection = styled.section`
+  background: #fff;
+  width: 100%;
+  padding: 3rem;
+  text-align: center;
+`;
+
+const ProjectWrapper = styled.div`
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(10rem, 1fr);
+  grid-gap: 1rem;
+  justify-content: center;
+  justify-items: center;
+`;
+
 const HeroTitle = styled.h1`
   text-transform: uppercase;
   color: white;
@@ -47,6 +64,21 @@ const IndexPage = () => (
         of apps and sites I have made. If you have a project in mind, feel free
         to reach out and we can talk about options for your development needs!</HeroText>
     </Hero>
+<<<<<<< HEAD
+=======
+    <ProjectSection>
+      <h2>Projects</h2>
+      <ProjectWrapper>
+        {projects.map(project => {
+          return <Project>{project.name}</Project>
+        })}
+      </ProjectWrapper>
+    </ProjectSection>
+    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
+      <Image />
+    </div>
+    <Link to="/page-2/">Go to page 2</Link>
+>>>>>>> 2e5212222a687f5b72af146abedbf2fdf20d7542
   </Layout >
 )
 
