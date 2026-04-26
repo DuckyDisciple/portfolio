@@ -1,0 +1,4 @@
+/** Generated with scripts/encrypt-safe-messages.mjs. Do not edit ciphertext by hand. */
+export const ENCRYPTED_SAFE_MESSAGES: string[] = [
+  'eyJ2IjoxLCJpdGVyIjoxMDAwMDAsInNhbHQiOiJoUXBQMHZuc2ZOdVpxUy9hbElyZEVnPT0iLCJpdiI6InpuMHlTWHdOa2pJS05QMmIiLCJjdCI6IndtV1dDWG5hbUczMWJVNmdvRy9TK21wdHBQVDVwOEVmdEVZK29FcHdFeHU3dDBDQ1Yram0ydVZZMzc2RVgyTVFtV0s0MXFwdENXMlI0WDdscmc2R29uWEhqMC9CRENFbVNUbnVubWxiYVBLKzJZZnVaYzhPUjhRQUxnYTdOZHZnT0d5RTBzRVZRN2Mva2c2MktTTy80WGJLV3pZUSJ9',
+];

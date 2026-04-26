@@ -1,0 +1,157 @@
+---
+import SafeLayout from '../../layouts/SafeLayout.astro';
+import FormspreeForm from '../../components/FormspreeForm.astro';
+import { ENCRYPTED_SAFE_MESSAGES } from '../../lib/safe-messages';
+
+/** SHA-256 hex of passphrase (precomputed). Never store the raw passphrase in source. */
+const PASSPHRASE_DIGEST_HEX =
+  '8d54efb91fed801820dda961ef4609f87ae9e80c1da940bd8c356ec90c0ba428';
+---
+
+<SafeLayout>
+  <main class="safe">
+    <div id="safe-gate" class="safe__panel">
+      <h1>Welcome</h1>
+      <p>Enter the passphrase to continue.</p>
+      <form id="safe-gate-form">
+        <div class="form-field">
+          <label class="u-sr-only" for="safe-pass">Passphrase</label>
+          <input
+            id="safe-pass"
+            type="password"
+            name="phrase"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
+        <button type="submit" class="btn">Continue</button>
+        <p id="safe-gate-error" class="safe__error" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div id="safe-unlocked" class="safe-hidden" style="width: 100%; max-width: 36rem">
+      <div class="safe__panel" style="max-width: 36rem">
+        <FormspreeForm
+          formAction="https://formspree.io/f/mjgjdykn"
+          formId="safe-contact-form"
+          heading="Leave a message"
+          intro="If you like, say how you landed here. This note goes to a separate inbox."
+        />
+      </div>
+    </div>
+  </main>
+</SafeLayout>
+
+<script
+  define:vars={{
+    PASSPHRASE_DIGEST_HEX,
+    ENCRYPTED_SAFE_MESSAGES,
+  }}
+>
+  const STORAGE_KEY = 'safe-unlocked';
+  const CACHE_KEY = 'safe-msg-plain';
+
+  async function sha256Hex(value) {
+    const buf = new TextEncoder().encode(value);
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function b64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function deriveAesKey(passphrase, saltBytes, iterations) {
+    const enc = new TextEncoder().encode(passphrase);
+    const baseKey = await crypto.subtle.importKey('raw', enc, 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: saltBytes, iterations, hash: 'SHA-256' },
+      baseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt'],
+    );
+  }
+
+  async function decryptBlob(passphrase, blobB64) {
+    const json = new TextDecoder().decode(b64ToBytes(blobB64));
+    const o = JSON.parse(json);
+    if (o.v !== 1 || typeof o.iter !== 'number') throw new Error('bad blob');
+    const salt = b64ToBytes(o.salt);
+    const iv = b64ToBytes(o.iv);
+    const ct = b64ToBytes(o.ct);
+    const key = await deriveAesKey(passphrase, salt, o.iter);
+    const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+    return new TextDecoder().decode(plainBuf);
+  }
+
+  async function decryptAll(passphrase) {
+    return Promise.all(ENCRYPTED_SAFE_MESSAGES.map((b) => decryptBlob(passphrase, b)));
+  }
+
+  /** Plaintext only in an HTML comment (DevTools), placed under the ASCII banner, before <head>. */
+  function injectMessagesAsHtmlComments(plainList) {
+    const root = document.documentElement;
+    const head = document.querySelector('head');
+    if (!head || root.dataset.safeMsgComments === '1') return;
+    const text = plainList
+      .map((m, i) => `Message ${i + 1}: ${m}`)
+      .join('\n\n')
+      .replace(/--/g, '- -');
+    root.insertBefore(document.createComment(`\n${text}\n`), head);
+    root.dataset.safeMsgComments = '1';
+  }
+
+  function showUnlocked(plainList) {
+    document.getElementById('safe-gate')?.classList.add('safe-hidden');
+    const panel = document.getElementById('safe-unlocked');
+    panel?.classList.remove('safe-hidden');
+    injectMessagesAsHtmlComments(plainList);
+  }
+
+  function tryRestoreSession() {
+    if (sessionStorage.getItem(STORAGE_KEY) !== '1') return;
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    try {
+      const list = JSON.parse(raw);
+      if (!Array.isArray(list) || !list.every((x) => typeof x === 'string')) throw new Error('bad cache');
+      showUnlocked(list);
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(CACHE_KEY);
+    }
+  }
+
+  tryRestoreSession();
+
+  document.getElementById('safe-gate-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('safe-pass');
+    const err = document.getElementById('safe-gate-error');
+    if (!(input instanceof HTMLInputElement) || !(err instanceof HTMLElement)) return;
+    err.textContent = '';
+    const phrase = input.value;
+    const hex = await sha256Hex(phrase);
+    if (hex !== PASSPHRASE_DIGEST_HEX) {
+      err.textContent = 'That does not match.';
+      return;
+    }
+    try {
+      const plainList = await decryptAll(phrase);
+      sessionStorage.setItem(STORAGE_KEY, '1');
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(plainList));
+      input.value = '';
+      showUnlocked(plainList);
+    } catch {
+      err.textContent = 'Could not unlock messages. The ciphertext may be out of date.';
+    }
+  });
+</script>

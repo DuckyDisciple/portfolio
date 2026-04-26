@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import FormspreeForm from '../components/FormspreeForm.astro';
+
+const title = 'Drew Sartorius: Websites, apps & systems';
+const description =
+  'I build websites, apps, and digital systems that help you bring ideas to life and reclaim time away from the busyness of the business.';
+
+const heroVideoSrc = `${import.meta.env.BASE_URL}Hero.mp4`;
+const heroImageSrc = `${import.meta.env.BASE_URL}Hero.jpg`;
+const midpageImageSrc = `${import.meta.env.BASE_URL}MidPage.jpg`;
+---
+
+<BaseLayout {title} {description}>
+  <SiteHeader />
+  <main>
+    <section class="hero">
+      <div class="hero__media" aria-hidden="true">
+        <img
+          class="hero__fallback-img"
+          src={heroImageSrc}
+          alt=""
+          width="2400"
+          height="1350"
+          decoding="async"
+          fetchpriority="high"
+        />
+        <video
+          class="hero__video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster={heroImageSrc}
+        >
+          <source src={heroVideoSrc} type="video/mp4" />
+        </video>
+      </div>
+      <div class="u-container hero__content reveal">
+        <h1>Ideas deserve room to breathe</h1>
+        <p class="hero__lede">
+          I develop websites, apps, and digital systems that turn your vision into something you can
+          rely on, so you are not stuck in the busyness of the business and you have room to focus
+          on what matters most to you.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--elevated">
+      <div class="u-container section-split">
+        <div class="section__intro reveal">
+          <h2>Clarity, craft, and calm operations</h2>
+          <p>
+            Whether you need a refined marketing site, a product people pay for, or solid tools and
+            workflows running behind the scenes, I care about the details that make technology feel
+            effortless on the surface.
+          </p>
+          <ul class="bullets">
+            <li>Thoughtful UX and performance: fast, accessible, and easy to maintain</li>
+            <li>Systems that reduce manual work instead of adding another dashboard to babysit</li>
+            <li>A steady partnership: clear communication, realistic scope, honest timelines</li>
+          </ul>
+        </div>
+        <figure class="section__figure reveal">
+          <img
+            src={midpageImageSrc}
+            alt="Calm interior detail with soft natural light"
+            width="1600"
+            height="1000"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="u-container">
+        <div class="contact-panel reveal">
+          <div class="contact-panel__grid">
+            <div>
+              <h2>Tell me what you are building</h2>
+              <p>
+                Share where you are today and where you want to be. If we are a fit, we will map a
+                sensible path forward with no jargon and no pressure.
+              </p>
+            </div>
+            <FormspreeForm
+              formAction="https://formspree.io/f/xrervpbd"
+              formId="main-contact-form"
+              heading="Send a note"
+              intro=""
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</BaseLayout>

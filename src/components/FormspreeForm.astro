@@ -1,0 +1,96 @@
+---
+interface Props {
+  formAction: string;
+  formId: string;
+  heading?: string;
+  intro?: string;
+}
+
+const {
+  formAction,
+  formId,
+  heading = 'Start a conversation',
+  intro = 'Tell me a little about what you are building. I read every message.',
+} = Astro.props;
+
+const siteKey =
+  import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ||
+  '6Lc968ssAAAAAJkB2A6Wh5F3zmCTC-NbPggkhdyK';
+---
+
+<div class="contact-panel__form">
+  <h3>{heading}</h3>
+  {intro && <p>{intro}</p>}
+  <form id={formId} method="POST" action={formAction} novalidate>
+    <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="u-sr-only" aria-hidden="true" />
+    <div class="form-field">
+      <label for={`${formId}-name`}>Name</label>
+      <input id={`${formId}-name`} type="text" name="name" autocomplete="name" />
+    </div>
+    <div class="form-field">
+      <label for={`${formId}-email`}>Email <span aria-hidden="true">*</span></label>
+      <input id={`${formId}-email`} type="email" name="email" required autocomplete="email" />
+    </div>
+    <div class="form-field">
+      <label for={`${formId}-message`}>Message <span aria-hidden="true">*</span></label>
+      <textarea id={`${formId}-message`} name="message" required></textarea>
+    </div>
+    <button type="submit" class="btn">Send message</button>
+    <p class="form-status" data-form-status data-variant=""></p>
+  </form>
+</div>
+
+<script src={`https://www.google.com/recaptcha/api.js?render=${siteKey}`} async defer></script>
+
+<script define:vars={{ siteKey, formAction, formId }}>
+  const form = document.getElementById(formId);
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = form.querySelector('[data-form-status]');
+      const btn = form.querySelector('button[type="submit"]');
+      if (!(status instanceof HTMLElement) || !(btn instanceof HTMLButtonElement)) return;
+
+      status.textContent = '';
+      status.removeAttribute('data-variant');
+      btn.disabled = true;
+
+      try {
+        const g = window.grecaptcha;
+        if (!g?.execute) {
+          throw new Error('reCAPTCHA not loaded');
+        }
+        await new Promise((resolve) => {
+          g.ready(resolve);
+        });
+        const token = await g.execute(siteKey, { action: 'submit' });
+        const fd = new FormData(form);
+        fd.set('g-recaptcha-response', token);
+
+        const res = await fetch(formAction, {
+          method: 'POST',
+          body: fd,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (res.ok) {
+          status.textContent = 'Sent. I will be in touch soon.';
+          status.dataset.variant = 'success';
+          form.reset();
+        } else {
+          const data = await res.json().catch(() => null);
+          const msg =
+            data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+              ? data.error
+              : 'Could not send.';
+          throw new Error(msg);
+        }
+      } catch {
+        status.textContent = 'Could not send. Please try again in a moment.';
+        status.dataset.variant = 'error';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+</script>
